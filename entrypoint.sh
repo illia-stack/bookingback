@@ -4,15 +4,18 @@ echo "🚀 Starting Laravel Container..."
 
 sleep 5
 
+# Laravel Cache
 php artisan config:clear
 php artisan cache:clear
 
+# Migrationen
 php artisan migrate --force
 
-# ✅ NUR EINMAL Seeder ausführen
+# Seeder nur einmal
 if [ ! -f /app/.seeded ]; then
-  php artisan db:seed --force
+  php artisan db:seed --class=PropertySeeder --force
   touch /app/.seeded
 fi
 
+# Laravel starten
 php artisan serve --host=0.0.0.0 --port=10000

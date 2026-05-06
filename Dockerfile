@@ -20,15 +20,11 @@ COPY . .
 # Composer installieren
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel Cache
-RUN php artisan config:clear
-RUN php artisan cache:clear
+# Entrypoint ausführbar machen
+RUN chmod +x /app/entrypoint.sh
 
 # Port
 EXPOSE 10000
 
-# Start
-CMD sh -c "\
-php artisan migrate --force && \
-php artisan db:seed --class=PropertySeeder --force && \
-php artisan serve --host=0.0.0.0 --port=10000"
+# Startscript
+ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
