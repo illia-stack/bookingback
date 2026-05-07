@@ -58,15 +58,18 @@ class BookingController extends Controller
         } catch (\Exception $e) {
 
             Log::error('Booking error', [
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'user' => auth()->id(),
+                'request' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Booking failed',
-                'error' => $e->getMessage()
+                'message' => $e->getMessage()
             ], 400);
         }
+
+            
     }
 
     /**
