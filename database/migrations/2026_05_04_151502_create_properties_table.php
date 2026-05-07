@@ -18,9 +18,9 @@ return new class extends Migration
             $table->text('description');
             $table->string('city');
             $table->string('address');
-            $table->integer('price_per_night');
+            $table->decimal('price_per_night', 10, 2);
+            $table->integer('max_guests');
             $table->string('image_url')->nullable();
-            $table->integer('max_guests')->default(2);
             $table->timestamps();
         });
     }

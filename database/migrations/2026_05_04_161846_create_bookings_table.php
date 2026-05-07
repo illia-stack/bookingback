@@ -27,6 +27,7 @@ return new class extends Migration
             // ✅ FINAL STATUS (ENUM – wichtig für Stripe + Webhook + App Logic)
             $table->enum('status', [
                 'pending',
+                'processing',   // 🔥 HINZUFÜGEN
                 'paid',
                 'cancelled',
                 'failed'
