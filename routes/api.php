@@ -1,10 +1,11 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StripeWebhookController;
 
 // Public routes
@@ -27,6 +28,11 @@ Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
 
+    // Current user
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -38,7 +44,4 @@ Route::middleware('auth:sanctum')->group(function () {
     // Bookings
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
-
-    // Payments
-    Route::post('/checkout', [PaymentController::class, 'checkout']);
 });
