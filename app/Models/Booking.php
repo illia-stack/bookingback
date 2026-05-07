@@ -31,6 +31,12 @@ class Booking extends Model
         'paid_at' => 'datetime',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -41,8 +47,69 @@ class Booking extends Model
         return $this->belongsTo(Property::class);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS HELPERS
+    |--------------------------------------------------------------------------
+    */
+
+    public function isPending(): bool
+    {
+        return $this->status === BookingStatus::PENDING;
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->status === BookingStatus::PROCESSING;
+    }
+
     public function isPaid(): bool
     {
         return $this->status === BookingStatus::PAID;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === BookingStatus::CANCELLED;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === BookingStatus::FAILED;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUSINESS LOGIC HELPERS
+    |--------------------------------------------------------------------------
+    */
+
+    public function markAsProcessing(): self
+    {
+        $this->update([
+            'status' => BookingStatus::PROCESSING,
+        ]);
+
+        return $this;
+    }
+
+    public function markAsPaid(?string $paymentIntentId = null): self
+    {
+        $this->update([
+            'status' => BookingStatus::PAID,
+            'paid_at' => now(),
+            'stripe_payment_intent_id' => $paymentIntentId,
+        ]);
+
+        return $this;
+    }
+
+    public function markAsFailed(): self
+    {
+        $this->update([
+            'status' => BookingStatus::FAILED,
+        ]);
+
+        return $this;
     }
 }

@@ -71,7 +71,7 @@ class PropertyController extends Controller
             'address' => 'required|string',
             'price_per_night' => 'required|numeric|min:0',
             'max_guests' => 'required|integer|min:1',
-            'image_url' => 'nullable|url'
+            'image_url' => 'nullable|url|max:2048'
         ]);
 
         $userId = auth()->id();
@@ -121,7 +121,7 @@ class PropertyController extends Controller
             'address' => 'sometimes|required|string',
             'price_per_night' => 'sometimes|required|numeric|min:0',
             'max_guests' => 'sometimes|required|integer|min:1',
-            'image_url' => 'nullable|url'
+            'image_url' => 'nullable|url|max:2048'
         ]);
 
         $property->update($request->only([

@@ -9,19 +9,25 @@ use App\Http\Controllers\StripeWebhookController;
 
 // Public routes
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware('throttle:5,1')
+        ->post('/register', [AuthController::class, 'register']);
+
+    Route::middleware('throttle:5,1')
+        ->post('/login', [AuthController::class, 'login']);
 });
 
+// Public properties
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
 
-// 🔥 Stripe Webhook (muss öffentlich sein!)
+// Stripe webhook (public)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
 
+    // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Properties
@@ -33,6 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
 
-    // 💳 Checkout MUSS geschützt sein
+    // Payments
     Route::post('/checkout', [PaymentController::class, 'checkout']);
 });

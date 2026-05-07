@@ -33,11 +33,22 @@ class PaymentController extends Controller
             ], 400);
         }
 
-        $session = $paymentService->createCheckoutSession($booking);
+        try {
 
-        return response()->json([
-            'success' => true,
-            'url' => $session->url
-        ]);
+            $session = $paymentService->createCheckoutSession($booking);
+
+            return response()->json([
+                'success' => true,
+                'url' => $session->url
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment session failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

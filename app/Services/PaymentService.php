@@ -5,6 +5,7 @@ namespace App\Services;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use App\Models\Booking;
+use App\Enums\BookingStatus;
 
 class PaymentService
 {
@@ -15,7 +16,21 @@ class PaymentService
 
     public function createCheckoutSession(Booking $booking)
     {
+        // Sicherheit: Booking muss existieren
+        if (!$booking) {
+            throw new \Exception('Booking not found');
+        }
+
+        $frontendUrl = config('app.frontend_url');
+
+        if (!$frontendUrl) {
+            throw new \Exception('Frontend URL not configured');
+        }
+
         $session = Session::create([
+            // verhindert doppelte Stripe Sessions
+            'idempotency_key' => 'booking_' . $booking->id,
+
             'payment_method_types' => ['card'],
 
             'line_items' => [[
@@ -31,17 +46,18 @@ class PaymentService
 
             'mode' => 'payment',
 
-            'success_url' => config('app.frontend_url') . '/success?booking_id=' . $booking->id,
-            'cancel_url' => config('app.frontend_url') . '/cancel?booking_id=' . $booking->id,
+            'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id,
+            'cancel_url'  => $frontendUrl . '/cancel?booking_id=' . $booking->id,
 
             'metadata' => [
                 'booking_id' => $booking->id,
             ],
         ]);
 
-        // speichern für später (Webhook)
+        // Booking in "processing" setzen → verhindert Doppel-Checkout
         $booking->update([
             'stripe_session_id' => $session->id,
+            'status' => BookingStatus::PROCESSING ?? BookingStatus::PENDING,
         ]);
 
         return $session;
