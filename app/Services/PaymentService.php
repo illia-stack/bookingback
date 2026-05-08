@@ -68,6 +68,6 @@ class PaymentService
             'status' => BookingStatus::PROCESSING,
         ]);
 
-        return $session;cd 
+        return $session; 
     }
 }
