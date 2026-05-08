@@ -16,7 +16,6 @@ class PaymentService
 
     public function createCheckoutSession(Booking $booking)
     {
-        // Sicherheit: Booking muss existieren
         if (!$booking) {
             throw new \Exception('Booking not found');
         }
@@ -27,37 +26,41 @@ class PaymentService
             throw new \Exception('Frontend URL not configured');
         }
 
-        $session = Session::create([
-            // verhindert doppelte Stripe Sessions
-            'idempotency_key' => 'booking_' . $booking->id,
+        $session = Session::create(
+            [
+                'payment_method_types' => ['card'],
 
-            'payment_method_types' => ['card'],
-
-            'line_items' => [[
-                'price_data' => [
-                    'currency' => 'eur',
-                    'product_data' => [
-                        'name' => 'Booking #' . $booking->id,
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => 'Booking #' . $booking->id,
+                        ],
+                        'unit_amount' => (int) round($booking->total_price * 100),
                     ],
-                    'unit_amount' => (int) round($booking->total_price * 100),
+                    'quantity' => 1,
+                ]],
+
+                'mode' => 'payment',
+
+                'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id,
+
+                'cancel_url' => $frontendUrl . '/cancel?booking_id=' . $booking->id,
+
+                'metadata' => [
+                    'booking_id' => $booking->id,
                 ],
-                'quantity' => 1,
-            ]],
-
-            'mode' => 'payment',
-
-            'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id,
-            'cancel_url'  => $frontendUrl . '/cancel?booking_id=' . $booking->id,
-
-            'metadata' => [
-                'booking_id' => $booking->id,
             ],
-        ]);
 
-        // Booking in "processing" setzen → verhindert Doppel-Checkout
+            // ✅ STRIPE OPTIONS ARRAY
+            [
+                'idempotency_key' => 'booking_' . $booking->id,
+            ]
+        );
+
         $booking->update([
             'stripe_session_id' => $session->id,
-            'status' => BookingStatus::PROCESSING ?? BookingStatus::PENDING,
+            'status' => BookingStatus::PROCESSING,
         ]);
 
         return $session;
