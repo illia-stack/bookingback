@@ -22,6 +22,7 @@ class BookingController extends Controller
             'property_id' => 'required|exists:properties,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
+            'locale' => 'nullable|string',
         ]);
 
         $userId = auth()->id();
@@ -43,7 +44,10 @@ class BookingController extends Controller
             );
 
             // 2. Stripe Checkout Session erstellen
-            $session = $paymentService->createCheckoutSession($booking);
+            $session = $paymentService->createCheckoutSession(
+                $booking,
+                $request->locale ?? 'auto'
+            );
 
             // 3. Optional: Status setzen (PROCESSING)
             $bookingService->markAsProcessing($booking);

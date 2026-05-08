@@ -14,7 +14,10 @@ class PaymentService
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
-    public function createCheckoutSession(Booking $booking)
+    public function createCheckoutSession(
+        Booking $booking,
+        string $locale = 'auto'
+    )
     {
         if (!$booking) {
             throw new \Exception('Booking not found');
@@ -29,6 +32,8 @@ class PaymentService
         $session = Session::create(
             [
                 'payment_method_types' => ['card'],
+
+                'locale' => $locale,
 
                 'line_items' => [[
                     'price_data' => [
@@ -63,6 +68,6 @@ class PaymentService
             'status' => BookingStatus::PROCESSING,
         ]);
 
-        return $session;
+        return $session;cd 
     }
 }
