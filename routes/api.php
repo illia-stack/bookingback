@@ -8,6 +8,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StripeWebhookController;
 
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminReportController;
 
 // Public routes
@@ -55,6 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::middleware('admin')->group(function () {
 
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
+        
         Route::get('/admin/export-bookings',
             [AdminReportController::class, 'exportBookings']
         );
