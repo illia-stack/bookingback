@@ -8,6 +8,8 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StripeWebhookController;
 
+use App\Http\Controllers\AdminReportController;
+
 // Public routes
 Route::prefix('auth')->group(function () {
 
@@ -44,4 +46,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Bookings
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN REPORT EXPORT
+    |--------------------------------------------------------------------------
+    */
+
+        Route::middleware('admin')->group(function () {
+
+        Route::get('/admin/export-bookings',
+            [AdminReportController::class, 'exportBookings']
+        );
+
+    });
 });

@@ -110,8 +110,13 @@ class PropertyController extends Controller
     {
         $property = Property::findOrFail($id);
 
-        if ($property->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (
+            $property->user_id !== auth()->id() &&
+            !auth()->user()->isAdmin()
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
         }
 
         $request->validate([
@@ -149,8 +154,13 @@ class PropertyController extends Controller
     {
         $property = Property::findOrFail($id);
 
-        if ($property->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+       if (
+            $property->user_id !== auth()->id() &&
+            !auth()->user()->isAdmin()
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
         }
 
         $property->delete();

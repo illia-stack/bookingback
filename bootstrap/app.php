@@ -13,8 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        // CSRF Exceptions
         $middleware->validateCsrfTokens(except: [
             'api/stripe/webhook',
+        ]);
+
+        // Custom Middleware Aliases
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
     })
