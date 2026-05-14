@@ -9,16 +9,16 @@ class AdminReportController extends Controller
 {
     public function exportBookings(Request $request)
     {
-        // Bearer Token vom Frontend
         $token = $request->bearerToken();
 
-        // Aufruf der Spring Boot API, die Excel liefert
+        // Spring Boot API aufrufen
         $response = Http::withToken($token)
-            ->get('https://booking-report.onrender.com/api/reports/bookings');
+            ->get('https://booking-report.onrender.com/report/excel');
 
-        // Rückgabe als Download
         return response($response->body(), 200)
             ->header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            ->header('Content-Disposition', 'attachment; filename=booking-report.xlsx');
+            ->header('Content-Disposition', 'attachment; filename="booking-report.xlsx"')
+            ->header('Content-Length', strlen($response->body()))
+            ->header('Content-Transfer-Encoding', 'binary');
     }
 }
