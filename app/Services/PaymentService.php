@@ -48,9 +48,8 @@ class PaymentService
 
                 'mode' => 'payment',
 
-                'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id,
-
-                'cancel_url' => $frontendUrl . '/cancel?booking_id=' . $booking->id,
+               'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id . '&lang=' . $locale,
+               'cancel_url' => $frontendUrl . '/cancel?booking_id=' . $booking->id . '&lang=' . $locale,
 
                 'metadata' => [
                     'booking_id' => $booking->id,
