@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class BookingController extends Controller
 {
     /**
-     * Neue Buchung erstellen + direkt Stripe Checkout starten
+     * Neue Buchung erstellen + Stripe Checkout starten
      */
     public function store(
         Request $request,
@@ -35,7 +35,7 @@ class BookingController extends Controller
         }
 
         try {
-            // 1. Booking erstellen (PENDING)
+            // 1️⃣ Booking erstellen (PENDING)
             $booking = $bookingService->createBooking(
                 $userId,
                 $request->property_id,
@@ -43,41 +43,42 @@ class BookingController extends Controller
                 $request->check_out
             );
 
-            // 2. Stripe Checkout Session erstellen
+            // 2️⃣ Stripe Checkout Session erstellen
             $session = $paymentService->createCheckoutSession(
                 $booking,
-                $request->locale ?? 'auto'
+                $request->input('locale', 'auto') // ✅ korrekt
             );
 
-            // 3. Optional: Status setzen (PROCESSING)
+            // 3️⃣ Optional: Status auf PROCESSING setzen
             $bookingService->markAsProcessing($booking);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Booking created',
-                'data' => $booking,
-                'checkout_url' => $session->url
+                'message' => 'Booking created successfully',
+                'data' => [
+                    'booking' => $booking,
+                    'checkout_url' => $session->url
+                ]
             ], 201);
 
         } catch (\Exception $e) {
 
-            Log::error('Booking error', [
+            Log::error('Booking creation error', [
                 'message' => $e->getMessage(),
-                'user' => auth()->id(),
+                'user' => $userId,
                 'request' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Failed to create booking',
+                'error' => $e->getMessage()
             ], 400);
         }
-
-            
     }
 
     /**
-     * Alle Bookings des Users
+     * Alle Bookings des aktuellen Users
      */
     public function myBookings()
     {
@@ -97,6 +98,7 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
+            'message' => $bookings->isEmpty() ? 'No bookings found' : 'Bookings retrieved successfully',
             'data' => $bookings
         ]);
     }

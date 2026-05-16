@@ -12,9 +12,17 @@ class BookingService
 {
     /**
      * Prüfen ob Property im Zeitraum verfügbar ist
+     *
+     * @param int $propertyId
+     * @param string|Carbon $checkIn
+     * @param string|Carbon $checkOut
+     * @return bool
      */
-    public function isAvailable($propertyId, $checkIn, $checkOut)
+    public function isAvailable(int $propertyId, $checkIn, $checkOut): bool
     {
+        $checkIn = $checkIn instanceof Carbon ? $checkIn : Carbon::parse($checkIn);
+        $checkOut = $checkOut instanceof Carbon ? $checkOut : Carbon::parse($checkOut);
+
         return !Booking::where('property_id', $propertyId)
             ->where('status', '!=', BookingStatus::CANCELLED)
             ->where(function ($query) use ($checkIn, $checkOut) {
@@ -26,28 +34,40 @@ class BookingService
 
     /**
      * Preis berechnen
+     *
+     * @param Property $property
+     * @param string|Carbon $checkIn
+     * @param string|Carbon $checkOut
+     * @return float
      */
-    public function calculatePrice($property, $checkIn, $checkOut)
+    public function calculatePrice(Property $property, $checkIn, $checkOut): float
     {
-        $days = max(
-            1,
-            Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut))
-        );
+        $checkIn = $checkIn instanceof Carbon ? $checkIn : Carbon::parse($checkIn);
+        $checkOut = $checkOut instanceof Carbon ? $checkOut : Carbon::parse($checkOut);
+
+        $days = max(1, $checkIn->diffInDays($checkOut));
 
         return $days * $property->price_per_night;
     }
 
     /**
      * Booking erstellen (PENDING)
+     *
+     * @param int $userId
+     * @param int $propertyId
+     * @param string|Carbon $checkIn
+     * @param string|Carbon $checkOut
+     * @return Booking
+     * @throws \Exception
      */
-    public function createBooking($userId, $propertyId, $checkIn, $checkOut)
+    public function createBooking(int $userId, int $propertyId, $checkIn, $checkOut): Booking
     {
         if (!$userId) {
             throw new \Exception('Unauthorized');
         }
 
-        $checkInDate = Carbon::parse($checkIn);
-        $checkOutDate = Carbon::parse($checkOut);
+        $checkInDate = $checkIn instanceof Carbon ? $checkIn : Carbon::parse($checkIn);
+        $checkOutDate = $checkOut instanceof Carbon ? $checkOut : Carbon::parse($checkOut);
 
         if ($checkInDate->greaterThanOrEqualTo($checkOutDate)) {
             throw new \Exception('Invalid dates');
@@ -55,19 +75,9 @@ class BookingService
 
         $property = Property::findOrFail($propertyId);
 
-        $totalPrice = $this->calculatePrice(
-            $property,
-            $checkInDate,
-            $checkOutDate
-        );
+        $totalPrice = $this->calculatePrice($property, $checkInDate, $checkOutDate);
 
-        return DB::transaction(function () use (
-            $userId,
-            $propertyId,
-            $checkInDate,
-            $checkOutDate,
-            $totalPrice
-        ) {
+        return DB::transaction(function () use ($userId, $propertyId, $checkInDate, $checkOutDate, $totalPrice) {
 
             // Double booking protection
             if (!$this->isAvailable($propertyId, $checkInDate, $checkOutDate)) {
@@ -87,8 +97,11 @@ class BookingService
 
     /**
      * Status auf Processing setzen (Stripe Checkout gestartet)
+     *
+     * @param Booking $booking
+     * @return Booking
      */
-    public function markAsProcessing(Booking $booking)
+    public function markAsProcessing(Booking $booking): Booking
     {
         $booking->update([
             'status' => BookingStatus::PROCESSING,
@@ -99,8 +112,12 @@ class BookingService
 
     /**
      * Status auf Paid setzen (Webhook)
+     *
+     * @param Booking $booking
+     * @param string|null $stripePaymentIntentId
+     * @return Booking
      */
-    public function markAsPaid(Booking $booking, $stripePaymentIntentId = null)
+    public function markAsPaid(Booking $booking, ?string $stripePaymentIntentId = null): Booking
     {
         $booking->update([
             'status' => BookingStatus::PAID,

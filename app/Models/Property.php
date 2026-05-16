@@ -11,6 +11,11 @@ class Property extends Model
 {
     use HasFactory;
 
+    /*
+    |--------------------------------------------------------------------------
+    | MASS ASSIGNMENT
+    |--------------------------------------------------------------------------
+    */
     protected $fillable = [
         'title',
         'description',
@@ -27,7 +32,6 @@ class Property extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -44,16 +48,19 @@ class Property extends Model
     |--------------------------------------------------------------------------
     */
 
+    // Gibt den Preis pro Nacht zurück (typisiert)
     public function averagePricePerDay(): float
     {
         return (float) $this->price_per_night;
     }
 
+    // Prüft, ob diese Property einem bestimmten User gehört
     public function isOwnedBy(int $userId): bool
     {
         return $this->user_id === $userId;
     }
 
+    // Prüft, ob aktive Buchungen bestehen
     public function hasActiveBookings(): bool
     {
         return $this->bookings()

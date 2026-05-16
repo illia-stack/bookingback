@@ -11,56 +11,66 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminReportController;
 
-// Public routes
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+
+// Auth routes (registration & login)
 Route::prefix('auth')->group(function () {
-
-    Route::middleware('throttle:5,1')
-        ->post('/register', [AuthController::class, 'register']);
-
-    Route::middleware('throttle:5,1')
-        ->post('/login', [AuthController::class, 'login']);
+    // Limit brute-force attempts
+    Route::middleware('throttle:5,1')->post('/register', [AuthController::class, 'register']);
+    Route::middleware('throttle:5,1')->post('/login', [AuthController::class, 'login']);
 });
 
-// Public properties
+// Public property routes
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
 
-// Stripe webhook (public)
+// Stripe webhook (public, no auth)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
-// Protected routes
+
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Authenticated)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Current user
+    // Current user info
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return response()->json($request->user());
     });
 
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Properties
-    Route::post('/properties', [PropertyController::class, 'store']);
-    Route::put('/properties/{id}', [PropertyController::class, 'update']);
-    Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+    // CRUD for properties
+    Route::prefix('properties')->group(function () {
+        Route::post('/', [PropertyController::class, 'store']);
+        Route::put('/{id}', [PropertyController::class, 'update']);
+        Route::delete('/{id}', [PropertyController::class, 'destroy']);
+    });
 
     // Bookings
-    Route::post('/bookings', [BookingController::class, 'store']);
-    Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+    Route::prefix('bookings')->group(function () {
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+    });
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN REPORT EXPORT
+    | Admin Routes
     |--------------------------------------------------------------------------
     */
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        // Manage users
+        Route::get('/users', [AdminUserController::class, 'index']);
 
-        Route::middleware('admin')->group(function () {
-
-        Route::get('/admin/users', [AdminUserController::class, 'index']);
-        
-        Route::get('/admin/export-bookings',
-            [AdminReportController::class, 'exportBookings']
-        );
-
+        // Export reports
+        Route::get('/export-bookings', [AdminReportController::class, 'exportBookings']);
     });
+
 });

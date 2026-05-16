@@ -14,13 +14,26 @@ class PaymentService
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
+    /**
+     * Erstellt eine Stripe Checkout Session für eine Buchung
+     *
+     * @param Booking $booking
+     * @param string $locale
+     * @return Session
+     * @throws \Exception
+     */
     public function createCheckoutSession(
         Booking $booking,
         string $locale = 'auto'
-    )
-    {
+    ): Session {
         if (!$booking) {
             throw new \Exception('Booking not found');
+        }
+
+        // Berechne total_price automatisch, falls noch nicht gesetzt
+        if (!$booking->total_price || $booking->total_price <= 0) {
+            $booking->total_price = $booking->calculateTotalPrice();
+            $booking->save();
         }
 
         $frontendUrl = config('app.frontend_url');
@@ -29,12 +42,11 @@ class PaymentService
             throw new \Exception('Frontend URL not configured');
         }
 
+        // Stripe Checkout Session erstellen
         $session = Session::create(
             [
                 'payment_method_types' => ['card'],
-
                 'locale' => $locale,
-
                 'line_items' => [[
                     'price_data' => [
                         'currency' => 'eur',
@@ -45,28 +57,24 @@ class PaymentService
                     ],
                     'quantity' => 1,
                 ]],
-
                 'mode' => 'payment',
-
-               'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id . '&lang=' . $locale,
-               'cancel_url' => $frontendUrl . '/cancel?booking_id=' . $booking->id . '&lang=' . $locale,
-
+                'success_url' => $frontendUrl . '/success?booking_id=' . $booking->id . '&lang=' . $locale,
+                'cancel_url' => $frontendUrl . '/cancel?booking_id=' . $booking->id . '&lang=' . $locale,
                 'metadata' => [
                     'booking_id' => $booking->id,
                 ],
             ],
-
-            // ✅ STRIPE OPTIONS ARRAY
             [
                 'idempotency_key' => 'booking_' . $booking->id,
             ]
         );
 
+        // Status direkt auf PROCESSING setzen
         $booking->update([
             'stripe_session_id' => $session->id,
             'status' => BookingStatus::PROCESSING,
         ]);
 
-        return $session; 
+        return $session;
     }
 }
