@@ -15,26 +15,25 @@ class PropertyController extends Controller
         $query = Property::query();
 
         // 🔍 Stadt
-        if ($city = $request->input('city')) {
-            $query->where('city', $city);
+        if ($request->filled('city')) {
+            $query->where('city', $request->city);
         }
 
         // 💰 Preis
-        if ($minPrice = $request->input('min_price')) {
-            $query->where('price_per_night', '>=', $minPrice);
+        if ($request->filled('min_price')) {
+            $query->where('price_per_night', '>=', $request->min_price);
         }
 
-        if ($maxPrice = $request->input('max_price')) {
-            $query->where('price_per_night', '<=', $maxPrice);
+        if ($request->filled('max_price')) {
+            $query->where('price_per_night', '<=', $request->max_price);
         }
 
         // 👥 Gäste
-        if ($guests = $request->input('guests')) {
-            $query->where('max_guests', '>=', $guests);
+        if ($request->filled('guests')) {
+            $query->where('max_guests', '>=', $request->guests);
         }
 
-        // Nur eigene Properties
-        if ($request->filled('my') && auth()->check()) {
+        if ($request->filled('my')) {
             $query->where('user_id', auth()->id());
         }
 
@@ -43,6 +42,7 @@ class PropertyController extends Controller
             'data' => $query->latest()->paginate(10)
         ]);
     }
+    
 
     /**
      * 🔍 Einzelne Property anzeigen
@@ -55,7 +55,9 @@ class PropertyController extends Controller
             'success' => true,
             'data' => $property
         ]);
+
     }
+
 
     /**
      * ➕ Neue Property erstellen
@@ -72,14 +74,16 @@ class PropertyController extends Controller
             'image_url' => 'nullable|url|max:2048'
         ]);
 
-        $user = auth()->user();
+        $userId = auth()->id();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+        if (!$userId) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
         }
 
-        $property = Property::create(array_merge(
-            $request->only([
+        $property = Property::create([
+            ...$request->only([
                 'title',
                 'description',
                 'city',
@@ -88,8 +92,8 @@ class PropertyController extends Controller
                 'max_guests',
                 'image_url'
             ]),
-            ['user_id' => $user->id]
-        ));
+            'user_id' => $userId
+        ]);
 
         return response()->json([
             'success' => true,
@@ -98,6 +102,7 @@ class PropertyController extends Controller
         ], 201);
     }
 
+
     /**
      * ✏️ Property aktualisieren
      */
@@ -105,9 +110,13 @@ class PropertyController extends Controller
     {
         $property = Property::findOrFail($id);
 
-        $user = auth()->user();
-        if ($property->user_id !== $user->id && !$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (
+            $property->user_id !== auth()->id() &&
+            !auth()->user()->isAdmin()
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
         }
 
         $request->validate([
@@ -137,6 +146,7 @@ class PropertyController extends Controller
         ]);
     }
 
+    
     /**
      * ❌ Property löschen
      */
@@ -144,9 +154,13 @@ class PropertyController extends Controller
     {
         $property = Property::findOrFail($id);
 
-        $user = auth()->user();
-        if ($property->user_id !== $user->id && !$user->isAdmin()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+       if (
+            $property->user_id !== auth()->id() &&
+            !auth()->user()->isAdmin()
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 403);
         }
 
         $property->delete();

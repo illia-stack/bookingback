@@ -16,7 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // CSRF Exceptions
         $middleware->validateCsrfTokens(except: [
             'api/stripe/webhook',
-            'api/*', // Alle API-Routen von CSRF ausnehmen
         ]);
 
         // Custom Middleware Aliases
@@ -26,22 +25,5 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-
-        // Logging aller Exceptions
-        $exceptions->report(function (Throwable $e) {
-            logger()->error($e);
-        });
-
-        // JSON Responses für API-Routen
-        $exceptions->renderable(function (Throwable $e, $request) {
-            if ($request->is('api/*')) {
-                $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
-
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], $status);
-            }
-        });
-
-    })
-    ->create();
+        //
+    })->create();

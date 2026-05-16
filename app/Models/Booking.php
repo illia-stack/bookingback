@@ -12,11 +12,6 @@ class Booking extends Model
 {
     use HasFactory;
 
-    /*
-    |--------------------------------------------------------------------------
-    | MASS ASSIGNMENT
-    |--------------------------------------------------------------------------
-    */
     protected $fillable = [
         'user_id',
         'property_id',
@@ -29,17 +24,11 @@ class Booking extends Model
         'paid_at',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | CASTS
-    |--------------------------------------------------------------------------
-    */
     protected $casts = [
         'status' => BookingStatus::class,
-        'check_in' => 'datetime',   // vorher 'date'
-        'check_out' => 'datetime',  // vorher 'date'
+        'check_in' => 'date',
+        'check_out' => 'date',
         'paid_at' => 'datetime',
-        'total_price' => 'float',
     ];
 
     /*
@@ -47,6 +36,7 @@ class Booking extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -62,6 +52,7 @@ class Booking extends Model
     | STATUS HELPERS
     |--------------------------------------------------------------------------
     */
+
     public function isPending(): bool
     {
         return $this->status === BookingStatus::PENDING;
@@ -93,7 +84,6 @@ class Booking extends Model
     |--------------------------------------------------------------------------
     */
 
-    // Status setzen auf PROCESSING
     public function markAsProcessing(): self
     {
         $this->update([
@@ -103,7 +93,6 @@ class Booking extends Model
         return $this;
     }
 
-    // Status setzen auf PAID + optionale Payment Intent ID
     public function markAsPaid(?string $paymentIntentId = null): self
     {
         $this->update([
@@ -115,7 +104,6 @@ class Booking extends Model
         return $this;
     }
 
-    // Status setzen auf FAILED
     public function markAsFailed(): self
     {
         $this->update([
@@ -123,19 +111,5 @@ class Booking extends Model
         ]);
 
         return $this;
-    }
-
-    // Berechnet die Dauer der Buchung in Tagen
-    public function getDuration(): int
-    {
-        return $this->check_in->diffInDays($this->check_out);
-    }
-
-    // Berechnet den Gesamtpreis
-    public function calculateTotalPrice(): float
-    {
-        if (!$this->property) return 0;
-
-        return $this->getDuration() * $this->property->price_per_night;
     }
 }

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Booking;
+use App\Models\Property;
 
 class User extends Authenticatable
 {
@@ -16,6 +18,7 @@ class User extends Authenticatable
     | MASS ASSIGNMENT
     |--------------------------------------------------------------------------
     */
+
     protected $fillable = [
         'name',
         'email',
@@ -28,6 +31,7 @@ class User extends Authenticatable
     | HIDDEN FIELDS
     |--------------------------------------------------------------------------
     */
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -38,16 +42,21 @@ class User extends Authenticatable
     | CASTS
     |--------------------------------------------------------------------------
     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed', // Laravel 12 automatische Hashing
-    ];
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
     |--------------------------------------------------------------------------
     */
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);
@@ -63,6 +72,7 @@ class User extends Authenticatable
     | ROLE HELPERS
     |--------------------------------------------------------------------------
     */
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

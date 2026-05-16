@@ -11,90 +11,76 @@ use Illuminate\Support\Facades\DB;
 
 class StripeWebhookController extends Controller
 {
-    /**
-     * Handle Stripe webhook events.
-     */
     public function handle(Request $request)
     {
         $payload = $request->getContent();
+
         $sigHeader = $request->header('Stripe-Signature');
+
         $secret = config('services.stripe.webhook_secret');
 
         try {
-            $event = Webhook::constructEvent($payload, $sigHeader, $secret);
+
+            $event = Webhook::constructEvent(
+                $payload,
+                $sigHeader,
+                $secret
+            );
+
         } catch (\Exception $e) {
+
             Log::error('Stripe webhook signature error', [
-                'message' => $e->getMessage(),
-                'payload' => $payload,
+                'message' => $e->getMessage()
             ]);
 
             return response()->json([
-                'success' => false,
-                'message' => 'Invalid payload',
+                'error' => 'Invalid payload'
             ], 400);
         }
 
-        switch ($event->type) {
+        if ($event->type === 'checkout.session.completed') {
 
-            case 'checkout.session.completed':
-                $session = $event->data->object;
+            $session = $event->data->object;
 
-                $bookingId = $session->metadata->booking_id ?? null;
+            $bookingId = $session->metadata->booking_id ?? null;
 
-                if (!$bookingId || !is_numeric($bookingId)) {
-                    Log::warning('Stripe webhook: invalid booking id', [
-                        'metadata' => $session->metadata,
-                    ]);
+            if (!$bookingId || !is_numeric($bookingId)) {
 
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Invalid booking id',
-                    ], 400);
-                }
+                return response()->json([
+                    'error' => 'Invalid booking id'
+                ], 400);
+            }
 
-                $booking = Booking::find($bookingId);
+            $booking = Booking::find($bookingId);
 
-                if (!$booking) {
-                    Log::warning("Stripe webhook: booking not found", [
-                        'booking_id' => $bookingId,
-                    ]);
+            if (!$booking) {
 
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Booking not found',
-                    ], 404);
-                }
+                return response()->json([
+                    'error' => 'Booking not found'
+                ], 404);
+            }
 
-                // Stripe kann Events mehrfach senden
-                if ($booking->status === BookingStatus::PAID) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Booking already processed',
-                    ], 200);
-                }
+            // Stripe sendet Events mehrfach
+            if ($booking->status === BookingStatus::PAID) {
 
-                // Update booking in a transaction
-                DB::transaction(function () use ($booking, $session) {
-                    $booking->update([
-                        'status' => BookingStatus::PAID,
-                        'paid_at' => now(),
-                        'stripe_payment_intent_id' => $session->payment_intent ?? null,
-                    ]);
-                });
+                return response()->json([
+                    'status' => 'already processed'
+                ], 200);
+            }
 
-                Log::info("Stripe payment completed for booking {$booking->id}");
+            DB::transaction(function () use ($booking, $session) {
 
-                break;
+                $booking->update([
+                    'status' => BookingStatus::PAID,
+                    'paid_at' => now(),
+                    'stripe_payment_intent_id' => $session->payment_intent ?? null,
+                ]);
 
-            default:
-                // Ignoriere andere Events
-                Log::info("Stripe webhook ignored event: {$event->type}");
-                break;
+            });
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Webhook handled successfully',
+            'status' => 'success'
         ], 200);
     }
 }
