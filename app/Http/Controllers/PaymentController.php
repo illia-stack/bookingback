@@ -47,7 +47,6 @@ class PaymentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Payment session failed',
-                'error' => $e->getMessage()
             ], 500);
         }
     }
