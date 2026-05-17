@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\ContactController;
 
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminReportController;
@@ -28,6 +29,9 @@ Route::get('/properties/{id}', [PropertyController::class, 'show']);
 // Stripe webhook (public)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
 
+//Contact
+    Route::post('/contact', [ContactController::class, 'send']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -47,6 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Bookings
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+
+    
 
     /*
     |--------------------------------------------------------------------------
