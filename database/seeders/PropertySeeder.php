@@ -30,7 +30,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Gran Via 10',
                 'price_per_night' => 120,
                 'max_guests' => 2,
-                'image_url' => 'https://images.unsplash.com/photo-1.jpg',
+                'image_url' => '/storage/Madrid_1.jpg',
             ],
             [
                 'title' => 'Charming Studio Madrid',
@@ -39,7 +39,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Paseo del Prado 15',
                 'price_per_night' => 80,
                 'max_guests' => 2,
-                'image_url' => 'https://images.unsplash.com/photo-4.jpg',
+                'image_url' => '/storage/Madrid_2.jpg',
             ],
             [
                 'title' => 'Luxury Flat Madrid',
@@ -48,7 +48,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Calle Mayor 22',
                 'price_per_night' => 250,
                 'max_guests' => 4,
-                'image_url' => 'https://images.unsplash.com/photo-5.jpg',
+                'image_url' => '/storage/Madrid_3.jpg',
             ],
 
             // Barcelona
@@ -59,7 +59,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Beach Street 5',
                 'price_per_night' => 200,
                 'max_guests' => 4,
-                'image_url' => 'https://images.unsplash.com/photo-2.jpg',
+                'image_url' => '/storage/Barcelona_1.jpg',
             ],
             [
                 'title' => 'Cozy Apartment Barcelona',
@@ -68,7 +68,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Carrer de Mallorca 200',
                 'price_per_night' => 150,
                 'max_guests' => 3,
-                'image_url' => 'https://images.unsplash.com/photo-6.jpg',
+                'image_url' => '/storage/Barcelona_2.jpg',
             ],
             [
                 'title' => 'Seaside Villa Barcelona',
@@ -77,7 +77,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Passeig Marítim 50',
                 'price_per_night' => 300,
                 'max_guests' => 6,
-                'image_url' => 'https://images.unsplash.com/photo-7.jpg',
+                'image_url' => '/storage/Barcelona_3.jpg',
             ],
 
             // Valencia
@@ -88,7 +88,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Old Town 3',
                 'price_per_night' => 90,
                 'max_guests' => 2,
-                'image_url' => 'https://images.unsplash.com/photo-3.jpg',
+                'image_url' => '/storage/Valencia_1.jpg',
             ],
             [
                 'title' => 'Bright Loft Valencia',
@@ -97,7 +97,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Calle de la Paz 12',
                 'price_per_night' => 100,
                 'max_guests' => 2,
-                'image_url' => 'https://images.unsplash.com/photo-8.jpg',
+                'image_url' => '/storage/Valencia_2.jpg',
             ],
             [
                 'title' => 'Family House Valencia',
@@ -106,7 +106,7 @@ class PropertySeeder extends Seeder
                 'address' => 'Avenida del Mar 18',
                 'price_per_night' => 220,
                 'max_guests' => 5,
-                'image_url' => 'https://images.unsplash.com/photo-9.jpg',
+                'image_url' => '/storage/Valencia_3.jpg',
             ],
         ];
         foreach ($properties as $property) {
