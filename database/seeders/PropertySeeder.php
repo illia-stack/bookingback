@@ -109,14 +109,10 @@ class PropertySeeder extends Seeder
                 'image_url' => 'https://images.unsplash.com/photo-9.jpg',
             ],
         ];
-
         foreach ($properties as $property) {
-            Property::firstOrCreate(
-                ['title' => $property['title']], // verhindert doppelte Einträge
-                array_merge($property, [
-                    'user_id' => $user->id, // dynamisch
-                ])
-            );
+            Property::create(array_merge($property, [
+                'user_id' => $user->id,
+            ]));
         }
     }
 }
