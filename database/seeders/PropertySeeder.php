@@ -16,7 +16,7 @@ class PropertySeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'password' => bcrypt('password'),
-                'role' => 'admin', // optional
+                'role' => 'user', // optional
             ]
         );
 
