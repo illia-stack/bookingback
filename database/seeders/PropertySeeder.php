@@ -110,9 +110,12 @@ class PropertySeeder extends Seeder
             ],
         ];
         foreach ($properties as $property) {
-            Property::create(array_merge($property, [
-                'user_id' => $user->id,
-            ]));
+            Property::firstOrCreate(
+                ['title' => $property['title']], // prüft Titel auf Duplikat
+                array_merge($property, [
+                    'user_id' => $user->id,
+                ])
+            );
         }
     }
 }
