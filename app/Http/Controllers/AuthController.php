@@ -1,9 +1,15 @@
+<?php
+
+namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    // REGISTER
     public function register(Request $request)
     {
         $request->validate([
@@ -15,7 +21,8 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
+            'role' => 'user',
         ]);
 
         Auth::login($user);
@@ -26,14 +33,15 @@ class AuthController extends Controller
         ]);
     }
 
+    // LOGIN (SANCTUM COOKIE)
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
@@ -42,10 +50,11 @@ class AuthController extends Controller
         $request->session()->regenerate();
 
         return response()->json([
-            'user' => Auth::user()
+            'user' => $request->user()
         ]);
     }
 
+    // LOGOUT
     public function logout(Request $request)
     {
         Auth::logout();

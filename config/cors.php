@@ -1,14 +1,16 @@
 <?php
 
-
 return [
 
-    'paths' => ['api/*', 'login', 'logout', 'sanctum/csrf-cookie'],
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+    ],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://bookingfront-b9j1.onrender.com'
+        'https://bookingfront-b9j1.onrender.com',
     ],
 
     'allowed_origins_patterns' => [],
