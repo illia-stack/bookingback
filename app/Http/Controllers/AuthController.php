@@ -1,15 +1,9 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
-    // 🟢 REGISTER
     public function register(Request $request)
     {
         $request->validate([
@@ -21,61 +15,46 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'user',
+            'password' => bcrypt($request->password),
         ]);
 
-        // Token für HttpOnly-Cookie
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
+        $request->session()->regenerate();
 
-        return response()
-            ->json(['user' => $user])
-            ->cookie(
-                'token', $token,
-                60*24,
-                '/',
-                env('SESSION_DOMAIN', null),
-                true,  // HTTPS only
-                true   // HttpOnly
-            );
+        return response()->json([
+            'user' => $user
+        ]);
     }
 
-    // 🔵 LOGIN
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
         }
 
-        $user = Auth::user(); // Sicherer als nochmal Query
+        $request->session()->regenerate();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()
-            ->json(['user' => $user])
-            ->cookie(
-                'token', $token, 
-                60*24, // 1 Tag
-                '/', 
-                env('SESSION_DOMAIN', null), // Optional für Subdomains
-                true,  // Secure, nur HTTPS
-                true   // HttpOnly
-            );
+        return response()->json([
+            'user' => Auth::user()
+        ]);
     }
 
-    // 🔴 LOGOUT
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logged out'
-        ])
-        ->cookie('token', '', -1, '/', env('SESSION_DOMAIN', null), true, true); // Cookie löschen
+        ]);
     }
 }
