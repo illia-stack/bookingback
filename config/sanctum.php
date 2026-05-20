@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', '')),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'bookingfront-b9j1.onrender.com')),
 
     /*
     |--------------------------------------------------------------------------

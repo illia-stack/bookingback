@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -24,12 +25,19 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
+        // Token für HttpOnly-Cookie
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ], 201);
+        return response()
+            ->json(['user' => $user])
+            ->cookie(
+                'token', $token,
+                60*24,
+                '/',
+                env('SESSION_DOMAIN', null),
+                true,  // HTTPS only
+                true   // HttpOnly
+            );
     }
 
     // 🔵 LOGIN
@@ -40,20 +48,24 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
+        $user = Auth::user(); // Sicherer als nochmal Query
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ]);
+        return response()
+            ->json(['user' => $user])
+            ->cookie(
+                'token', $token, 
+                60*24, // 1 Tag
+                '/', 
+                env('SESSION_DOMAIN', null), // Optional für Subdomains
+                true,  // Secure, nur HTTPS
+                true   // HttpOnly
+            );
     }
 
     // 🔴 LOGOUT
@@ -63,6 +75,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logged out'
-        ]);
+        ])
+        ->cookie('token', '', -1, '/', env('SESSION_DOMAIN', null), true, true); // Cookie löschen
     }
 }

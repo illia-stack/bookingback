@@ -6,6 +6,7 @@ use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use App\Models\Booking;
 use App\Enums\BookingStatus;
+use Stripe\Checkout\Session as StripeSession;
 
 class PaymentService
 {
@@ -17,7 +18,7 @@ class PaymentService
     public function createCheckoutSession(
         Booking $booking,
         string $locale = 'auto'
-    )
+    ): StripeSession
     {
         if (!$booking) {
             throw new \Exception('Booking not found');
