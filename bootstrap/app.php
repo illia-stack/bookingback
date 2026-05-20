@@ -11,7 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+
     ->withMiddleware(function (Middleware $middleware): void {
+
+        // Sanctum Stateful API aktivieren
+        $middleware->statefulApi();
 
         // CSRF Exceptions
         $middleware->validateCsrfTokens(except: [
@@ -24,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+
+    ->create();
