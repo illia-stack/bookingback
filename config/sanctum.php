@@ -3,7 +3,7 @@
     use Laravel\Sanctum\Sanctum;
 
     return [
-        'stateful' => ['bookingfront-b9j1.onrender.com'],
+        'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS')),
 
         'guard' => ['web'],
 

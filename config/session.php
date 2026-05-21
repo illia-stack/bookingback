@@ -63,9 +63,9 @@ return [
 
     'path' => '/',
 
-    'domain' => '.onrender.com', // Cross-subdomain
+    'domain' => env('SESSION_DOMAIN', null), // Cross-subdomain
 
-    'secure' => true,            // HTTPS nötig
+    'secure' => env('SESSION_SECURE_COOKIE', false),            // HTTPS nötig
 
     'http_only' => true,         // Cookie nur HTTP
 
