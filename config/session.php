@@ -63,7 +63,7 @@ return [
 
     'path' => '/',
 
-    'domain' => '.onrender.com', // Cross-subdomain
+    'domain' => 'bookingfront-b9j1.onrender.com', // Cross-subdomain
 
     'secure' => true,            // HTTPS nötig
 
