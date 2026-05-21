@@ -3,22 +3,71 @@
 use Illuminate\Support\Str;
 
 return [
-    'driver' => env('SESSION_DRIVER', 'file'),
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session Driver
+    |--------------------------------------------------------------------------
+    |
+    | Hier definieren wir, wo die Session gespeichert wird. Standard: Datei.
+    |
+    */
+    'driver' => 'file',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session Lifetime
+    |--------------------------------------------------------------------------
+    |
+    | Lebensdauer der Session in Minuten.
+    |
+    */
+    'lifetime' => 120,
+
     'expire_on_close' => false,
+
     'encrypt' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session File Location
+    |--------------------------------------------------------------------------
+    */
     'files' => storage_path('framework/sessions'),
-    'connection' => env('SESSION_CONNECTION'),
-    'table' => env('SESSION_TABLE', 'sessions'),
-    'store' => env('SESSION_STORE'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Datenbank / Cache Optionen
+    |--------------------------------------------------------------------------
+    */
+    'connection' => null,
+    'table' => 'sessions',
+    'store' => null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session Lottery
+    |--------------------------------------------------------------------------
+    |
+    | Kontrolliert, wie oft alte Sessions gelöscht werden.
+    |
+    */
     'lottery' => [2, 100],
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_') . '_session'
-    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cookie Options
+    |--------------------------------------------------------------------------
+    */
+    'cookie' => Str::slug('laravel', '_') . '_session', // Cookie-Name
+
     'path' => '/',
-    'domain' => '.onrender.com', // <- Cross-subdomain
+
+    'domain' => '.onrender.com', // Cross-subdomain
+
     'secure' => true,            // HTTPS nötig
-    'http_only' => true,         // session cookie ok
+
+    'http_only' => true,         // Cookie nur HTTP
+
     'same_site' => 'none',       // Cross-site Cookies
 ];

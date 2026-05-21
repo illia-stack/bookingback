@@ -13,3 +13,6 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 });
+Route::middleware('auth:sanctum')->get('/auth/user', function () {
+    return response()->json(['user' => Auth::user()]);
+});
