@@ -1,10 +1,9 @@
 <?php
 
 return [
-    'paths' => ['*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'auth/*'],
     'allowed_methods' => ['*'],
     'allowed_origins' => ['https://bookingfront-b9j1.onrender.com'],
-    'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
