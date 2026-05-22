@@ -17,14 +17,15 @@ Route::middleware('auth:sanctum')->get('/auth/user', function () {
     return response()->json(['user' => Auth::user()]);
 });
 
-Route::get('/session-test', function () {
-
-    session(['test' => 'works']);
+Route::get('/debug/auth', function (Request $request) {
 
     return response()->json([
+        'user' => auth()->user(),
+        'check' => auth()->check(),
         'session_id' => session()->getId(),
-        'csrf_token' => csrf_token(),
-        'session' => session()->all(),
-        'cookies' => request()->cookies->all(),
+        'csrf' => csrf_token(),
+        'session_all' => session()->all(),
+        'cookies' => $request->cookies->all(),
+        'header_origin' => $request->header('origin'),
     ]);
 });
