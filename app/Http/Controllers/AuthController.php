@@ -42,12 +42,48 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
+
+            \Log::info('LOGIN FAILED', [
+                'email' => $request->email,
+                'ip' => $request->ip(),
+            ]);
+
+            \Log::info('SESSION CSRF TOKEN', [
+                'csrf_session' => csrf_token(),
+                'csrf_header' => $request->header('X-XSRF-TOKEN'),
+            ]);
+
+            \Log::info('SESSION DEBUG', [
+                'session_id' => session()->getId(),
+                'cookie_session' => $request->cookie(config('session.cookie')),
+            ]);
+
+            \Log::info('AUTH CHECK', [
+                'check' => Auth::check(),
+                'id' => Auth::id(),
+            ]);
+
+            \Log::info('REQUEST META', [
+                'origin' => $request->headers->get('origin'),
+                'user_agent' => $request->userAgent(),
+                'ip' => $request->ip(),
+            ]);
+
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
 
         $request->session()->regenerate();
+
+        \Log::info('LOGIN SUCCESS', [
+            'user_id' => Auth::id(),
+            'session_id' => session()->getId(),
+            'csrf_token' => csrf_token(),
+            'session' => session()->all(),
+            'cookies' => $request->cookies->all(),
+            'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
+        ]);
 
         return response()->json([
             'user' => $request->user()
