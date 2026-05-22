@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'auth/*', 'sanctum/csrf-cookie'],
+    'paths' => ['*'],
     'allowed_methods' => ['*'],
     'allowed_origins' => ['https://bookingfront-b9j1.onrender.com'],
     'allowed_origins_patterns' => [],
