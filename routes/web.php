@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -15,4 +15,16 @@ Route::prefix('auth')->group(function () {
 });
 Route::middleware('auth:sanctum')->get('/auth/user', function () {
     return response()->json(['user' => Auth::user()]);
+});
+
+Route::get('/session-test', function () {
+
+    session(['test' => 'works']);
+
+    return response()->json([
+        'session_id' => session()->getId(),
+        'csrf_token' => csrf_token(),
+        'session' => session()->all(),
+        'cookies' => request()->cookies->all(),
+    ]);
 });
