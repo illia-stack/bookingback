@@ -1,20 +1,22 @@
-    <?php
+<?php
 
-    use Laravel\Sanctum\Sanctum;
+use Laravel\Sanctum\Sanctum;
 
-    return [
-        'stateful' => ['bookingfront-b9j1.onrender.com'],
+return [
 
-        'guard' => ['web'],
+    // kann leer bleiben oder komplett entfernt werden
+    'stateful' => [],
 
-        'expiration' => null,
+    // bleibt, ist ok
+    'guard' => ['web'],
 
-        'token_prefix' => '',
+    // optional
+    'expiration' => null,
 
-        'middleware' => [
-            'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,
-            'encrypt_cookies' => Illuminate\Cookie\Middleware\EncryptCookies::class,
-            'validate_csrf_token' => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-        ],
+    'token_prefix' => '',
 
-    ];
+    // 🔥 WICHTIG: Middleware für SPA/Cookies NICHT mehr nötig
+    'middleware' => [
+        // kann leer bleiben oder minimal
+    ],
+];

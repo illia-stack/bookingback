@@ -25,15 +25,16 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        // TOKEN ERSTELLEN
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
-    // LOGIN (SANCTUM COOKIE)
+    // LOGIN
     public function login(Request $request)
     {
         $request->validate([
@@ -42,25 +43,28 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($request->only('email', 'password'))) {
+
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
 
-        $request->session()->regenerate();
+        $user = User::where('email', $request->email)->first();
+
+        // TOKEN
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $request->user()
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
     // LOGOUT
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // aktuelles token löschen
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Logged out'

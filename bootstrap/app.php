@@ -14,13 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // Sanctum Stateful API aktivieren
-        $middleware->statefulApi();
+        // ❌ NICHT MEHR NÖTIG (Bearer Token statt Cookie Auth)
+        // $middleware->statefulApi();
 
-        // CSRF Exceptions
-        $middleware->validateCsrfTokens(except: [
-            'api/stripe/webhook',
-        ]);
+        // ❌ NICHT MEHR NÖTIG (kein CSRF bei API Tokens)
+        // $middleware->validateCsrfTokens(except: [
+        //     'api/stripe/webhook',
+        // ]);
 
         // Custom Middleware Aliases
         $middleware->alias([
