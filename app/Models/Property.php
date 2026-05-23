@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Booking;
+use App\Enums\BookingStatus;
 
 class Property extends Model
 {
@@ -57,7 +58,11 @@ class Property extends Model
     public function hasActiveBookings(): bool
     {
         return $this->bookings()
-            ->whereIn('status', ['pending', 'processing', 'paid'])
+            ->whereIn('status', [
+                BookingStatus::PENDING,
+                BookingStatus::PROCESSING,
+                BookingStatus::PAID,
+            ])
             ->exists();
     }
 }

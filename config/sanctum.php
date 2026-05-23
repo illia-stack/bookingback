@@ -1,15 +1,22 @@
-    <?php
+<?php
 
-    use Laravel\Sanctum\Sanctum;
+use Laravel\Sanctum\Sanctum;
 
-    return [
-        'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS')),
+return [
+
+    // kann leer bleiben oder komplett entfernt werden
+    'stateful' => [],
+
+    // bleibt, ist ok
     'guard' => ['web'],
-    'expiration' => null,
-    'middleware' => [
-        'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,
-        'encrypt_cookies' => Illuminate\Cookie\Middleware\EncryptCookies::class,
-        'validate_csrf_token' => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-    ],
 
-    ];
+    // optional
+    'expiration' => null,
+
+    'token_prefix' => '',
+
+    // 🔥 WICHTIG: Middleware für SPA/Cookies NICHT mehr nötig
+    'middleware' => [
+        // kann leer bleiben oder minimal
+    ],
+];

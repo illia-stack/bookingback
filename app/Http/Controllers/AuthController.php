@@ -25,15 +25,16 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        // TOKEN ERSTELLEN
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
-    // LOGIN (SANCTUM COOKIE)
+    // LOGIN
     public function login(Request $request)
     {
         $request->validate([
@@ -43,60 +44,27 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
 
-            \Log::info('LOGIN FAILED', [
-                'email' => $request->email,
-                'ip' => $request->ip(),
-            ]);
-
-            \Log::info('SESSION CSRF TOKEN', [
-                'csrf_session' => csrf_token(),
-                'csrf_header' => $request->header('X-XSRF-TOKEN'),
-            ]);
-
-            \Log::info('SESSION DEBUG', [
-                'session_id' => session()->getId(),
-                'cookie_session' => $request->cookie(config('session.cookie')),
-            ]);
-
-            \Log::info('AUTH CHECK', [
-                'check' => Auth::check(),
-                'id' => Auth::id(),
-            ]);
-
-            \Log::info('REQUEST META', [
-                'origin' => $request->headers->get('origin'),
-                'user_agent' => $request->userAgent(),
-                'ip' => $request->ip(),
-            ]);
-
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
 
-        $request->session()->regenerate();
+        $user = User::where('email', $request->email)->first();
 
-        \Log::info('LOGIN SUCCESS', [
-            'user_id' => Auth::id(),
-            'session_id' => session()->getId(),
-            'csrf_token' => csrf_token(),
-            'session' => session()->all(),
-            'cookies' => $request->cookies->all(),
-            'x_xsrf_token_header' => $request->header('X-XSRF-TOKEN'),
-        ]);
+        // TOKEN
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $request->user()
+            'user' => $user,
+            'token' => $token,
         ]);
     }
 
     // LOGOUT
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // aktuelles token löschen
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Logged out'

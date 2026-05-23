@@ -1,11 +1,27 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'auth/*'],
+
+    'paths' => [
+        'api/*',
+    ],
+
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['https://bookingfront-b9j1.onrender.com'],
-    'allowed_headers' => ['*'],
+
+    'allowed_origins' => [
+        'https://bookingfront-b9j1.onrender.com',
+    ],
+
+    'allowed_origins_patterns' => [],
+
+    'allowed_headers' => [
+        '*',
+    ],
+
     'exposed_headers' => [],
+
     'max_age' => 0,
-    'supports_credentials' => true,
+
+    // ❌ WICHTIG: muss false sein bei Bearer Token
+    'supports_credentials' => false,
 ];
