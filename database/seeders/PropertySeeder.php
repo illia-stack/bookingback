@@ -10,7 +10,8 @@ class PropertySeeder extends Seeder
 {
     public function run(): void
     {
-        // 1️⃣ Admin User sicherstellen
+        Property::truncate();
+    // 1️⃣ Admin User sicherstellen
         $user = User::firstOrCreate(
             ['email' => 'admin@test.com'],
             [
