@@ -16,7 +16,11 @@ class BookingService
     public function isAvailable($propertyId, $checkIn, $checkOut)
     {
         return !Booking::where('property_id', $propertyId)
-            ->where('status', '!=', BookingStatus::CANCELLED)
+            ->whereIn('status', [
+                BookingStatus::PENDING,
+                BookingStatus::PROCESSING,
+                BookingStatus::PAID,
+            ])
             ->where(function ($query) use ($checkIn, $checkOut) {
                 $query->where('check_in', '<', $checkOut)
                       ->where('check_out', '>', $checkIn);
@@ -27,12 +31,9 @@ class BookingService
     /**
      * Preis berechnen
      */
-    public function calculatePrice($property, $checkIn, $checkOut)
+    public function calculatePrice(Property $property, Carbon $checkIn, Carbon $checkOut)
     {
-        $days = max(
-            1,
-            Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut))
-        );
+        $days = max(1, $checkIn->diffInDays($checkOut));
 
         return $days * $property->price_per_night;
     }
@@ -53,25 +54,36 @@ class BookingService
             throw new \Exception('Invalid dates');
         }
 
-        $property = Property::findOrFail($propertyId);
-
-        $totalPrice = $this->calculatePrice(
-            $property,
-            $checkInDate,
-            $checkOutDate
-        );
+        
 
         return DB::transaction(function () use (
             $userId,
             $propertyId,
             $checkInDate,
             $checkOutDate,
-            $totalPrice
         ) {
+            $property = Property::lockForUpdate()->findOrFail($propertyId);
+            $totalPrice = $this->calculatePrice(
+                $property,
+                $checkInDate,
+                $checkOutDate
+            );
+            // LOCK rows
+            $conflict = Booking::where('property_id', $propertyId)
+                ->whereIn('status', [
+                    BookingStatus::PENDING,
+                    BookingStatus::PROCESSING,
+                    BookingStatus::PAID,
+                ])
+                ->where(function ($query) use ($checkInDate, $checkOutDate) {
+                    $query->where('check_in', '<', $checkOutDate)
+                        ->where('check_out', '>', $checkInDate);
+                })
+                ->lockForUpdate()
+                ->first();
 
-            // Double booking protection
-            if (!$this->isAvailable($propertyId, $checkInDate, $checkOutDate)) {
-                throw new \Exception('Property not available for selected dates');
+            if ($conflict) {
+                throw new \Exception('Property not available');
             }
 
             return Booking::create([
