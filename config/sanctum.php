@@ -5,9 +5,10 @@ use Laravel\Sanctum\Sanctum;
 return [
 
     // kann leer bleiben oder komplett entfernt werden
-    'stateful' =>  [
-    'bookingfront-b9j1.onrender.com',
-],
+    'stateful' => explode(
+        ',',
+        env('SANCTUM_STATEFUL_DOMAINS', '')
+    ),
 
     // bleibt, ist ok
     'guard' => ['web'],

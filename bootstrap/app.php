@@ -14,15 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // ❌ NICHT MEHR NÖTIG (Bearer Token statt Cookie Auth)
-        // $middleware->statefulApi();
+        $middleware->statefulApi();
 
-        // ❌ NICHT MEHR NÖTIG (kein CSRF bei API Tokens)
-        // $middleware->validateCsrfTokens(except: [
-        //     'api/stripe/webhook',
-        // ]);
-
-        // Custom Middleware Aliases
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);

@@ -5,6 +5,10 @@ return [
     'paths' => [
         'api/*',
         'sanctum/csrf-cookie',
+        'auth/*',
+        'login',
+        'logout',
+        'me',
     ],
 
     'allowed_methods' => ['*'],
