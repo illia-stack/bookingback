@@ -4,7 +4,7 @@ use Illuminate\Support\Str;
 
 return [
 
-    'driver' => 'file',
+    'driver' => 'database',
 
     'lifetime' => 120,
 
@@ -26,12 +26,11 @@ return [
 
     'path' => '/',
 
-    // ❌ NICHT mehr Cross-domain konfigurieren
-    'domain' => null,
+    'domain' => env('SESSION_DOMAIN'),
 
-    'secure' => false,
+    'secure' => true,
 
     'http_only' => true,
 
-    'same_site' => 'lax',
+    'same_site' => 'none',
 ];
