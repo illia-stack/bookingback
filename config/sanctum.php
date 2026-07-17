@@ -18,8 +18,9 @@ return [
 
     'token_prefix' => '',
 
-    // 🔥 WICHTIG: Middleware für SPA/Cookies NICHT mehr nötig
     'middleware' => [
-        // kann leer bleiben oder minimal
+        'authenticate_session' => Laravel\Sanctum\Http\Middleware\AuthenticateSession::class,
+        'encrypt_cookies' => Illuminate\Cookie\Middleware\EncryptCookies::class,
+        'validate_csrf_token' => Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
     ],
 ];
