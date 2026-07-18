@@ -1,13 +1,13 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SessionAuthController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\AdminReportController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,69 +15,108 @@ use App\Http\Controllers\AdminReportController;
 |--------------------------------------------------------------------------
 */
 
-// PUBLIC
 Route::get('/properties', [PropertyController::class, 'index']);
 Route::get('/properties/{id}', [PropertyController::class, 'show']);
 
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
-Route::post('/contact', [ContactController::class, 'send']);
+Route::get('/csrf', [
+    SessionAuthController::class,
+    'csrf'
+]);
+
+Route::post('/stripe/webhook', [
+    StripeWebhookController::class,
+    'handle'
+]);
+
+Route::post('/contact', [
+    ContactController::class,
+    'send'
+]);
+
+
 
 /*
 |--------------------------------------------------------------------------
-| AUTH (PUBLIC)
+| AUTH
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('throttle:5,1')->group(function () {
+Route::post('/auth/register', [
+    SessionAuthController::class,
+    'register'
+]);
 
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
-});
+Route::post('/auth/login', [
+    SessionAuthController::class,
+    'login'
+]);
+
+Route::post('/auth/logout', [
+    SessionAuthController::class,
+    'logout'
+]);
+
+Route::get('/me', [
+    SessionAuthController::class,
+    'me'
+]);
+
+
 
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES
 |--------------------------------------------------------------------------
+|
+| We replace auth:sanctum with your own session check middleware.
+|
 */
 
-Route::middleware('auth:sanctum')->group(function () {
 
-    // LOGOUT
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/me',[AuthController::class,'me']);
+Route::middleware('session.auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | PROPERTIES
-    |--------------------------------------------------------------------------
-    */
 
-    Route::post('/properties', [PropertyController::class, 'store']);
-    Route::put('/properties/{id}', [PropertyController::class, 'update']);
-    Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+    Route::post('/properties', [
+        PropertyController::class,
+        'store'
+    ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | BOOKINGS
-    |--------------------------------------------------------------------------
-    */
+    Route::put('/properties/{id}', [
+        PropertyController::class,
+        'update'
+    ]);
 
-    Route::post('/bookings', [BookingController::class, 'store']);
-    Route::get('/my-bookings', [BookingController::class, 'myBookings']);
+    Route::delete('/properties/{id}', [
+        PropertyController::class,
+        'destroy'
+    ]);
 
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN ONLY
-    |--------------------------------------------------------------------------
-    */
+
+    Route::post('/bookings', [
+        BookingController::class,
+        'store'
+    ]);
+
+    Route::get('/my-bookings', [
+        BookingController::class,
+        'myBookings'
+    ]);
+
+
 
     Route::middleware('admin')->group(function () {
 
-        Route::get('/admin/users', [AdminReportController::class, 'index']);
+        Route::get('/admin/users', [
+            AdminReportController::class,
+            'index'
+        ]);
 
         Route::get('/admin/export-bookings', [
             AdminReportController::class,
             'exportBookings'
         ]);
+
     });
+
+
 });
