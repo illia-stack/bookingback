@@ -18,11 +18,8 @@ return Application::configure(
 ->withMiddleware(function (Middleware $middleware): void {
 
     $middleware->alias([
-
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-
         'session.auth' => \App\Http\Middleware\SessionAuth::class,
-
     ]);
 
 })

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SessionAuthController;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\StripeWebhookController;
@@ -15,18 +14,22 @@ use App\Http\Controllers\AdminReportController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/properties', [PropertyController::class, 'index']);
-Route::get('/properties/{id}', [PropertyController::class, 'show']);
-
-Route::get('/csrf', [
-    SessionAuthController::class,
-    'csrf'
+Route::get('/properties', [
+    PropertyController::class,
+    'index'
 ]);
+
+Route::get('/properties/{id}', [
+    PropertyController::class,
+    'show'
+]);
+
 
 Route::post('/stripe/webhook', [
     StripeWebhookController::class,
     'handle'
 ]);
+
 
 Route::post('/contact', [
     ContactController::class,
@@ -37,41 +40,9 @@ Route::post('/contact', [
 
 /*
 |--------------------------------------------------------------------------
-| AUTH
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/auth/register', [
-    SessionAuthController::class,
-    'register'
-]);
-
-Route::post('/auth/login', [
-    SessionAuthController::class,
-    'login'
-]);
-
-Route::post('/auth/logout', [
-    SessionAuthController::class,
-    'logout'
-]);
-
-Route::get('/me', [
-    SessionAuthController::class,
-    'me'
-]);
-
-
-
-/*
-|--------------------------------------------------------------------------
 | PROTECTED ROUTES
 |--------------------------------------------------------------------------
-|
-| We replace auth:sanctum with your own session check middleware.
-|
 */
-
 
 Route::middleware('session.auth')->group(function () {
 
@@ -117,6 +88,5 @@ Route::middleware('session.auth')->group(function () {
         ]);
 
     });
-
 
 });
