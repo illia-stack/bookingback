@@ -11,18 +11,31 @@ class SessionAuthController extends Controller
 
     public function csrf(Request $request)
     {
-        if (!$request->session()->has('csrf_token')) {
-            $request->session()->regenerate();
-            $request->session()->put(
-                'csrf_token',
-                bin2hex(random_bytes(32))
-            );
+        try {
+
+            if (!$request->session()->has('csrf_token')) {
+
+                $request->session()->regenerate();
+
+                $request->session()->put(
+                    'csrf_token',
+                    bin2hex(random_bytes(32))
+                );
+            }
+
+            return response()->json([
+                "csrfToken" => $request->session()->get('csrf_token')
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                "message" => $e->getMessage(),
+                "file" => $e->getFile(),
+                "line" => $e->getLine(),
+            ], 500);
+
         }
-
-
-        return response()->json([
-            "csrfToken" => $request->session()->get('csrf_token')
-        ]);
     }
 
 
